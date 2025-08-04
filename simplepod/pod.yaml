@@ -1,0 +1,35 @@
+# Kubernetes Pod for Nginx Web Server
+# This file defines a single pod running an Nginx container
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod                    # Name of the pod
+  labels:
+    app: nginx-web                   # Label for identifying this pod
+spec:
+  containers:
+  - name: nginx                      # Name of the container within the pod
+    image: nginx:alpine              # Official Nginx Alpine image
+    imagePullPolicy: IfNotPresent    # Pull image only if not present locally
+    ports:
+    - containerPort: 80              # Port the Nginx container listens on
+    resources:
+      requests:                       # Minimum resources the container needs
+        memory: "64Mi"               # 64 Mebibytes of memory
+        cpu: "50m"                   # 50 millicores (0.05 CPU cores)
+      limits:                        # Maximum resources the container can use
+        memory: "128Mi"              # 128 Mebibytes of memory
+        cpu: "100m"                  # 100 millicores (0.1 CPU cores)
+    livenessProbe:                   # Health check to determine if container is alive
+      httpGet:
+        path: /                      # HTTP endpoint to check if Nginx is running
+        port: 80                     # Port to check
+      initialDelaySeconds: 10        # Wait 10 seconds before first check
+      periodSeconds: 10              # Check every 10 seconds
+    readinessProbe:                  # Health check to determine if container is ready to serve traffic
+      httpGet:
+        path: /                      # HTTP endpoint to check if Nginx is ready
+        port: 80                     # Port to check
+      initialDelaySeconds: 5         # Wait 5 seconds before first check
+      periodSeconds: 5               # Check every 5 seconds 

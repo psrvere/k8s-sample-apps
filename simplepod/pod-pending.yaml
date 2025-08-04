@@ -1,0 +1,22 @@
+# Pod with Scheduling Issue (Pending State)
+# This pod will remain in Pending state due to insufficient resources
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod-pending
+  labels:
+    app: nginx-web
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: "10Gi"  # Requesting 10GB memory (likely more than available)
+        cpu: "10"        # Requesting 10 CPU cores (likely more than available)
+      limits:
+        memory: "20Gi"   # 20GB memory limit
+        cpu: "20"        # 20 CPU cores limit 

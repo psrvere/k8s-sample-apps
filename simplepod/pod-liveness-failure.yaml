@@ -1,0 +1,37 @@
+# Pod with Liveness Probe Failure
+# This pod will fail liveness probes and restart repeatedly
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod-liveness-failure
+  labels:
+    app: nginx-web
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    command: ["/bin/sh"]
+    args: ["-c", "echo 'Starting nginx...'; nginx -g 'daemon off;' & sleep 10; echo 'Simulating failure...'; while true; do sleep 30; done"]  # Nginx starts but liveness probe fails
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /nonexistent  # This path doesn't exist, causing probe to fail
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5 

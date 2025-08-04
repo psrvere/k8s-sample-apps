@@ -1,0 +1,24 @@
+# Pod with OOM (Out of Memory) Issue
+# This pod will be killed due to memory exhaustion
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod-oom
+  labels:
+    app: nginx-web
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    command: ["/bin/sh"]
+    args: ["-c", "echo 'Allocating memory...'; while true; do dd if=/dev/zero of=/tmp/test bs=1M count=100; done"]  # Memory exhaustion
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"  # Will be exceeded by the memory allocation
+        cpu: "100m" 
