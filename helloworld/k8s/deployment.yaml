@@ -1,0 +1,47 @@
+# Kubernetes Deployment for Hello World Application
+# This file defines how to deploy and manage the Hello World app in Kubernetes
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-app          # Name of the deployment
+  labels:
+    app: helloworld-app         # Label for identifying this deployment
+spec:
+  replicas: 3                   # Number of pod replicas to maintain
+  selector:
+    matchLabels:
+      app: helloworld-app       # Selector to identify which pods belong to this deployment
+  template:
+    metadata:
+      labels:
+        app: helloworld-app     # Labels applied to each pod created by this deployment
+    spec:
+      containers:
+      - name: helloworld        # Name of the container within the pod
+        image: psrvere/k8s-samples-apps:helloworld-latest  # Docker image to use
+        imagePullPolicy: Always  # Always pull the latest image
+        ports:
+        - containerPort: 3000   # Port the container listens on
+        env:
+        - name: PORT            # Environment variable for the application
+          value: "3000"         # Set PORT to 3000
+        resources:
+          requests:              # Minimum resources the container needs
+            memory: "64Mi"       # 64 Mebibytes of memory (binary unit) = ~67.1 MB
+            cpu: "50m"           # 50 millicores (0.05 CPU cores)
+          limits:                # Maximum resources the container can use
+            memory: "128Mi"      # 128 Mebibytes of memory (binary unit) = ~134.2 MB
+            cpu: "100m"          # 100 millicores (0.1 CPU cores)
+        livenessProbe:          # Health check to determine if container is alive
+          httpGet:
+            path: /health        # HTTP endpoint to check if app is running
+            port: 3000           # Port to check
+          initialDelaySeconds: 30  # Wait 30 seconds before first check
+          periodSeconds: 10      # Check every 10 seconds
+        readinessProbe:         # Health check to determine if container is ready to serve traffic
+          httpGet:
+            path: /ready         # HTTP endpoint to check if app is ready to serve requests
+            port: 3000           # Port to check
+          initialDelaySeconds: 5   # Wait 5 seconds before first check
+          periodSeconds: 5       # Check every 5 seconds 
