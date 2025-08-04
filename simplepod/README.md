@@ -243,6 +243,23 @@ kubectl exec -it nginx-pod-crash-loop -- /bin/sh
 kubectl patch pod nginx-pod-crash-loop -p '{"spec":{"containers":[{"name":"nginx","command":["nginx"],"args":["-g","daemon off;"]}]}}'
 ```
 
+### Q: What's the difference between `kubectl logs` and `kubectl logs --previous`?
+
+**A:** `--previous` shows logs from the previous crashed container instance.
+
+**Example:**
+```bash
+$ kubectl logs nginx-pod-crash-loop --previous
+Pod will crash in 5 seconds
+
+$ kubectl logs nginx-pod-crash-loop
+Pod will crash in 5 seconds
+```
+
+**Why same output?** Both containers run identical commands, so logs are identical.
+
+**When useful:** When containers have different behavior between restarts or when debugging crashes.
+
 ### 3. Out of Memory (OOM) Killed (`pod-oom-killed.yaml`)
 
 **Symptoms:**
@@ -448,3 +465,31 @@ kubectl describe nodes
 | Probe Failure | `Running` (restarts) | `kubectl describe pod` | Fix probe path |
 | Pending | `Pending` | `kubectl describe pod` | Reduce resource requests |
 | Config Error | Validation error | `kubectl apply --dry-run` | Fix YAML syntax |
+
+### Q: Why do I see different pod statuses in watch mode vs regular mode?
+
+**A:** This is due to Kubernetes' CrashLoopBackOff mechanism with exponential backoff timing.
+
+**Watch Mode (Real-time):**
+```bash
+$ kubectl get pods --watch
+NAME                   READY   STATUS    RESTARTS      AGE
+nginx-pod-crash-loop   1/1     Running   2 (14s ago)   35s
+nginx-pod-crash-loop   0/1     Error     2 (17s ago)   38s
+nginx-pod-crash-loop   0/1     CrashLoopBackOff   2 (11s ago)   49s
+nginx-pod-crash-loop   1/1     Running            3 (28s ago)   66s
+nginx-pod-crash-loop   0/1     Error              3 (33s ago)   71s
+```
+
+**Regular Mode (Snapshot):**
+```bash
+$ kubectl get pods
+NAME                   READY   STATUS   RESTARTS      AGE
+nginx-pod-crash-loop   0/1     Error    3 (35s ago)   77s
+```
+
+**Explanation:**
+- **Watch mode** shows real-time state transitions
+- **Regular mode** shows current state snapshot
+- **CrashLoopBackOff** = Kubernetes waiting before next restart attempt
+- Pod cycles: Running → Error → CrashLoopBackOff → Running → Error...
