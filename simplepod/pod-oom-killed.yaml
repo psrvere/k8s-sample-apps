@@ -10,9 +10,9 @@ metadata:
 spec:
   containers:
   - name: nginx
-    image: nginx:alpine
-    command: ["/bin/sh"]
-    args: ["-c", "echo 'Allocating memory...'; while true; do dd if=/dev/zero of=/tmp/test bs=1M count=100; done"]  # Memory exhaustion
+    image: python:alpine
+    command: ["python3"]
+    args: ["-c", "import time; print('Starting memory test...'); time.sleep(2); print('Allocating memory...'); a = []; [a.append('x' * 1000000) or print('Allocated chunk', len(a)) for _ in iter(int, 1)]"]
     ports:
     - containerPort: 80
     resources:
@@ -20,5 +20,5 @@ spec:
         memory: "64Mi"
         cpu: "50m"
       limits:
-        memory: "128Mi"  # Will be exceeded by the memory allocation
+        memory: "96Mi"  # Reduced limit to trigger OOM faster
         cpu: "100m" 
