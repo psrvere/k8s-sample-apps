@@ -1,0 +1,23 @@
+# ConfigMap: Stores Elasticsearch configuration as key-value pairs
+# cluster.name: Names the Elasticsearch cluster for identification
+# node.name: Names individual nodes using pod metadata
+# network.host: Binds to all network interfaces (0.0.0.0)
+# http.port: HTTP API port for REST requests (9200)
+# discovery.type: Single-node mode (no cluster discovery needed)
+# xpack.security.enabled: Disables authentication for simplicity
+# cluster.routing.allocation.disk.threshold_enabled: Disables disk space checks
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: efk-stack
+data:
+  elasticsearch.yml: |
+    cluster.name: efk-cluster
+    node.name: ${NODE_NAME}
+    network.host: 0.0.0.0
+    http.port: 9200
+    discovery.type: single-node
+    xpack.security.enabled: false
+    cluster.routing.allocation.disk.threshold_enabled: false 

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: efk-stack
+  labels:
+    name: efk-stack
+    app: logging 
