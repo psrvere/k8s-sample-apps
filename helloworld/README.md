@@ -18,6 +18,7 @@ helloworld/
 ├── Dockerfile          # Container configuration
 ├── .dockerignore       # Docker build exclusions
 ├── k8s/
+│   ├── namespace.yaml  # Kubernetes namespace
 │   ├── deployment.yaml # Kubernetes deployment
 │   ├── service.yaml    # Kubernetes ClusterIP service
 │   └── service_nodeport.yaml # Kubernetes NodePort service
@@ -78,6 +79,9 @@ helloworld/
 
 3. Deploy to Kubernetes:
    ```bash
+   # Create the namespace first
+   kubectl apply -f k8s/namespace.yaml
+   
    # Deploy the application
    kubectl apply -f k8s/deployment.yaml
    
@@ -91,17 +95,17 @@ helloworld/
 
 4. Check deployment status:
    ```bash
-   kubectl get pods
-   kubectl get services
+   kubectl get pods -n helloworld
+   kubectl get services -n helloworld
    ```
 
 5. Access the application:
    ```bash
    # Option 1: Port forward to service (simplified)
-   kubectl port-forward service/helloworld-service 8080:3000
+   kubectl port-forward service/helloworld-service 8080:3000 -n helloworld
    
    # Option 2: Direct port forward to deployment (even simpler)
-   kubectl port-forward deployment/helloworld-app 8080:3000
+   kubectl port-forward deployment/helloworld-app 8080:3000 -n helloworld
    
    # Option 3: NodePort service (no port-forwarding needed)
    # If you deployed the NodePort service, access directly at:
@@ -111,6 +115,14 @@ helloworld/
    Then visit `http://localhost:8080` (port-forward) or `http://localhost:30080` (NodePort)
 
 ## Kubernetes Resources
+
+### Namespace
+- **Name**: `helloworld`
+- **Purpose**: Isolates all application resources in a dedicated namespace
+- **Benefits**: 
+  - Resource organization and isolation
+  - Easier cleanup and management
+  - Prevents naming conflicts with other applications
 
 ### Deployment
 - **Replicas**: 3 (for high availability)
@@ -140,20 +152,20 @@ helloworld/
 
 ```bash
 # View pod logs
-kubectl logs -l app=helloworld-app
+kubectl logs -l app=helloworld-app -n helloworld
 
 # Describe deployment
-kubectl describe deployment helloworld-app
+kubectl describe deployment helloworld-app -n helloworld
 
 # Check service endpoints
-kubectl get endpoints helloworld-service
+kubectl get endpoints helloworld-service -n helloworld
 ```
 
 ## Scaling
 
 Scale the deployment:
 ```bash
-kubectl scale deployment helloworld-app --replicas=5
+kubectl scale deployment helloworld-app --replicas=5 -n helloworld
 ```
 
 ## Cleanup
@@ -161,6 +173,11 @@ kubectl scale deployment helloworld-app --replicas=5
 Remove the deployment:
 ```bash
 kubectl delete -f k8s/
+```
+
+Or delete the entire namespace (which removes all resources):
+```bash
+kubectl delete namespace helloworld
 ```
 
 ### Q: Why did we change the service port from 80 to 3000?
