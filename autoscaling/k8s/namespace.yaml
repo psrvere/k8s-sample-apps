@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autoscaling-demo
+  labels:
+    name: autoscaling-demo
+    purpose: hpa-testing 

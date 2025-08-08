@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-app
+  namespace: autoscaling-demo
+  labels:
+    app: autoscaling-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: autoscaling-app
+  template:
+    metadata:
+      labels:
+        app: autoscaling-app
+    spec:
+      containers:
+      - name: autoscaling-app
+        image: psrvere/k8s-sample-app:autoscaling-latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000" 
